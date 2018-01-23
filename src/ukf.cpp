@@ -144,7 +144,7 @@ void UKF::PredictSigmaPoints(double delta_t) {
     double px = c[0];
     double py = c[1];
     double v = c[2];
-    double psi = c[3];
+    double psi = Tools::NormalizeAngle(c[3]);
     double psi_dot = c[4];
     double v_a = c[5];
     double v_psi_dot_dot = c[6];
@@ -161,7 +161,7 @@ void UKF::PredictSigmaPoints(double delta_t) {
     pred_stochastic << 0.5 * delta_t_2 * cos_psi * v_a,
                        0.5 * delta_t_2 * sin_psi * v_a,
                        delta_t * v_a,
-                       0.5 * delta_t_2 * v_psi_dot_dot,
+                       Tools::NormalizeAngle(0.5 * delta_t_2 * v_psi_dot_dot),
                        delta_t * v_psi_dot_dot;
 
     // Generate the prediction for the column.
@@ -169,16 +169,17 @@ void UKF::PredictSigmaPoints(double delta_t) {
       pred_deterministic << v_over_psi_dot * (sin(psi + (psi_dot * delta_t)) - sin_psi),
                             v_over_psi_dot * (-cos(psi + (psi_dot * delta_t)) + cos_psi),
                             0,
-                            psi_dot * delta_t,
+                            Tools::NormalizeAngle(psi_dot * delta_t),
                             0;
     } else {
       pred_deterministic << v * cos_psi * delta_t,
                             v * sin_psi * delta_t,
                             0,
-                            psi_dot * delta_t,
+                            Tools::NormalizeAngle(psi_dot * delta_t),
                             0;
     }
     pred = c.head<5>() + pred_deterministic + pred_stochastic;
+    pred(3) = Tools::NormalizeAngle(pred(3));
     Xsig_pred_.col(col) = pred;
   }
   PredicMeanAndCovarianceSigmaPoints();
