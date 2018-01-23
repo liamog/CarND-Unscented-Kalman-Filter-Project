@@ -9,21 +9,17 @@ using namespace std;
 
 class Tools {
 public:
-  /**
-  * Constructor.
-  */
-  Tools();
-
-  /**
-  * Destructor.
-  */
-  virtual ~Tools();
 
   /**
   * A helper method to calculate RMSE.
   */
-  VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
+  static VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
 
-};
+  /**
+  * A helper method to normalize an angle between -2pi and +2pi
+  */
+  static double NormalizeAngle(double radians_in);
+
+  };
 
 #endif /* TOOLS_H_ */
