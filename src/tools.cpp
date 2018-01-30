@@ -45,3 +45,41 @@ double Tools::NormalizeAngle(double radians_in) {
   }
   return normalized_angle;
 }
+
+VectorXd Tools::PositionSpaceToRadarMeasurementSpace(const VectorXd &x) {
+  VectorXd rm_space(3);
+  rm_space.fill(0.0);
+  // recover state parameters
+  float px = x(0);
+  float py = x(1);
+  float v = x(2);
+  float phi = x(3);
+
+  float c1 = (px * px) + (py * py);
+  if (c1 < 0.00001) return rm_space;
+  float c2 = sqrt(c1);
+
+  double ro = c2;
+  double theta = atan2(py, px);
+  double ro_dot = ((px * cos(phi) * v) + (py * sin(phi) * v)) / c2;
+  rm_space << ro, theta, ro_dot;
+  return rm_space;
+}
+
+void Tools::Print(const MatrixXd &matrix, const string &name) {
+  Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+  std::cout << name << "=" << std::endl << matrix.format(CleanFmt) << std::endl;
+}
+
+void Tools::Print(const VectorXd &vector, const string &name) {
+  Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+  std::cout << name << "=" << std::endl << vector.transpose().format(CleanFmt) << std::endl;
+}
+
+void Tools::PrintIn(const string &name) {
+  std::cout << ">>>>>>>>>>>> " << name << std::endl;
+}
+
+void Tools::PrintOut(const string &name) {
+  std::cout << "<<<<<<<<<<<< " << name << std::endl;
+}

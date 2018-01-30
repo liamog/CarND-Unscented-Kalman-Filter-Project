@@ -43,9 +43,7 @@ int main()
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
 
-    if (length && length > 2 && data[0] == '4' && data[1] == '2')
-    {
-
+    if (length && length > 2 && data[0] == '4' && data[1] == '2') {
       auto s = hasData(std::string(data));
       if (s != "") {
       	
@@ -112,10 +110,10 @@ int main()
 
     	  VectorXd estimate(4);
 
-    	  double p_x = ukf.x_(0);
-    	  double p_y = ukf.x_(1);
-    	  double v  = ukf.x_(2);
-    	  double yaw = ukf.x_(3);
+    	  double p_x = ukf.x()(0);
+    	  double p_y = ukf.x()(1);
+    	  double v  = ukf.x()(2);
+    	  double yaw = ukf.x()(3);
 
     	  double v1 = cos(yaw)*v;
     	  double v2 = sin(yaw)*v;

@@ -20,6 +20,18 @@ public:
   */
   static double NormalizeAngle(double radians_in);
 
-  };
+  /**
+   * Converts vector from state space to Radar measurement space.
+   * @param x state space
+   * @return Vector with 3 elements per Radar measurement.
+   */
+  static VectorXd PositionSpaceToRadarMeasurementSpace(const VectorXd &x);
+
+  static void Print(const MatrixXd &matrix, const string &name);
+  static void Print(const VectorXd &vector, const string &name);
+  static void PrintIn(const string &name);
+  static void PrintOut(const string &name);
+};
+
 
 #endif /* TOOLS_H_ */
