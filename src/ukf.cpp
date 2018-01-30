@@ -35,9 +35,9 @@ UKF::UKF() {
   // clang-format off
   P_ << 1, 0, 0, 0, 0,
         0, 1, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 1, 0,
-        0, 0, 0, 0, 1;
+        0, 0, 10, 0, 0,
+        0, 0, 0, 10, 0,
+        0, 0, 0, 0, 10;
   // clang-format on
 
   // initial sigma point predicted matrix
@@ -48,13 +48,10 @@ UKF::UKF() {
   T_rad_ = MatrixXd(n_x_, n_z_);
 
   // Discard all but px and py when taking LIDAR measurements.
-  H_lid_= MatrixXd(n_x_, n_x_);
+  H_lid_= MatrixXd(2, n_x_);
   // clang-format off
   H_lid_ << 1, 0, 0, 0, 0,
-            0, 1, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0;
+            0, 1, 0, 0, 0;
   // clang-format on
   H_lid_t_ = H_lid_.transpose();
   I_ = MatrixXd::Identity(n_x_, n_x_);
@@ -65,7 +62,7 @@ UKF::UKF() {
 
   // Process noise standard deviation yaw acceleration in rad/s^2
   // TODO yaw rate is way too high
-  std_yawdd_ = M_PI / 16;
+  std_yawdd_ = M_PI / 48;
   
   //DO NOT MODIFY measurement noise values below these are provided by the sensor manufacturer.
   // Laser measurement noise standard deviation position1 in m
@@ -93,12 +90,9 @@ UKF::UKF() {
             0, std_radphi_ * std_radphi_ ,0,
             0, 0, std_radrd_ * std_radrd_;
 
-  R_lid_ = MatrixXd(5, 5);
-  R_lid_ << std_laspx_ * std_laspx_, 0, 0, 0, 0,
-              0, std_laspy_* std_laspy_,0, 0, 0,
-              0 ,0 ,0 ,0 ,0,
-              0 ,0 ,0 ,0 ,0,
-              0 ,0 ,0 ,0 ,0;
+  R_lid_ = MatrixXd(2, 2);
+  R_lid_ << std_laspx_ * std_laspx_, 0,
+              0, std_laspy_* std_laspy_;
 
   weights_ = VectorXd(n_sigma_);
   double weight_0 = lambda_/(lambda_+n_aug_);
@@ -171,7 +165,7 @@ void UKF::ProcessMeasurement(MeasurementPackage measurement_pack) {
       use_laser_) {
     Tools::PrintIn("UKF::ProcessMeasurement LIDAR Measurement");
     Prediction(delta_t);
-    VectorXd measurements(n_x_);
+    VectorXd measurements(2);
     measurements.fill(0.0);
     measurements(0) = measurement_pack.raw_measurements_(0);
     measurements(1) = measurement_pack.raw_measurements_(1);
@@ -202,18 +196,22 @@ void UKF::UpdateLidar(double delta_t, const VectorXd& measurement) {
 
   VectorXd y = measurement - H_lid_ * x_;
   PRINT(y);
+  PRINT(H_lid_);
+  PRINT(H_lid_t_);
+  PRINT(R_lid_);
 
-  //calculate innovation covariance matrix S
-  MatrixXd S(n_x_, n_x_);
-  S.fill(0.0);
-  for (int ii = 0; ii < n_sigma_; ++ii) {  //iterate over sigma points
-    // state difference
-    VectorXd x_diff = Xsig_pred_.col(ii) - x_;
-    //angle normalization
-    x_diff(3) = Tools::NormalizeAngle(x_diff(3));
-    S = S + (weights_(ii) * x_diff * x_diff.transpose());
-  }
-  S = S + R_lid_;
+  MatrixXd S = H_lid_ * P_ * H_lid_t_ + R_lid_;
+//  //calculate innovation covariance matrix S
+//  MatrixXd S(n_x_, n_x_);
+//  S.fill(0.0);
+//  for (int ii = 0; ii < n_sigma_; ++ii) {  //iterate over sigma points
+//    // state difference
+//    VectorXd x_diff = Xsig_pred_.col(ii) - x_;
+//    //angle normalization
+//    x_diff(3) = Tools::NormalizeAngle(x_diff(3));
+//    S = S + (weights_(ii) * x_diff * x_diff.transpose());
+//  }
+//  S = S + R_lid_;
   PRINT(S);
 
   MatrixXd K = P_ * H_lid_t_ * S.inverse();
@@ -314,10 +312,6 @@ void UKF::PredictSigmaPoints(double delta_t) {
                             0;
     }
     pred = c.head<5>();
-//    PRINT(pred);
-//    PRINT(pred_stochastic);
-//    PRINT(pred_deterministic);
-
     pred += pred_deterministic + pred_stochastic;
     pred(3) = Tools::NormalizeAngle(pred(3));
 //    PRINT(pred);
