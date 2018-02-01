@@ -17,7 +17,7 @@ constexpr double kStdA = 2.0;
 
 // TUNABLE
 // Process noise standard deviation yaw acceleration in rad/s^2
-constexpr double kStdYawdd = M_PI / 3;
+constexpr double kStdYawDD = M_PI / 3;
 
 /////////////////////////////////////////////////////////////////////////
 // DO NOT MODIFY measurement noise values above these are provided by the
@@ -107,7 +107,7 @@ UKF::UKF()
 
   // clang-format off
   Q_ << kStdA * kStdA, 0,
-      0, kStdYawdd * kStdYawdd;
+      0, kStdYawDD * kStdYawDD;
   // clang-format on
 
   weights_(0) = kLambda / (kLambda + kNaug);
@@ -130,7 +130,7 @@ void UKF::ProcessMeasurement(MeasurementPackage measurement_pack) {
 
   if (!is_initialized_) {
     PRINT(1, kStdA);
-    PRINT(1, kStdYawdd);
+    PRINT(1, kStdYawDD);
     PRINT(1, P_);
 
     // first measurement
