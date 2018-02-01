@@ -28,6 +28,7 @@ std::string hasData(std::string s) {
 
 int main()
 {
+  int counter = 0;
   uWS::Hub h;
 
   // Create a Kalman Filter instance
@@ -38,7 +39,7 @@ int main()
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
 
-  h.onMessage([&ukf,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&counter, &ukf,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -135,12 +136,16 @@ int main()
           msgJson["rmse_vx"] = RMSE(2);
           msgJson["rmse_vy"] = RMSE(3);
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
-          // std::cout << msg << std::endl;
+          if (++counter == 499) {
+            std::cout << "rmse_x=" << RMSE(0) << std::endl;
+            std::cout << "rmse_y=" << RMSE(1) << std::endl;
+            std::cout << "rmse_vx=" << RMSE(2) << std::endl;
+            std::cout << "rmse_vy=" << RMSE(3) << std::endl;
+          }
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	  
         }
       } else {
-        
         std::string msg = "42[\"manual\",{}]";
         ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
       }

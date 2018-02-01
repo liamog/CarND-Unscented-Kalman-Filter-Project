@@ -1,7 +1,7 @@
-#ifndef TOOLS_H_
-#define TOOLS_H_
-#include <vector>
+#ifndef _USERS_LIAM_DEV_UDACITY_CARND_UNSCENTED_KALMAN_FILTER_PROJECT_SRC_TOOLS_H
+#define _USERS_LIAM_DEV_UDACITY_CARND_UNSCENTED_KALMAN_FILTER_PROJECT_SRC_TOOLS_H
 #include "Eigen/Dense"
+#include <vector>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -9,7 +9,6 @@ using namespace std;
 
 class Tools {
 public:
-
   /**
   * A helper method to calculate RMSE.
   */
@@ -27,10 +26,14 @@ public:
    */
   static VectorXd PositionSpaceToRadarMeasurementSpace(const VectorXd &x);
 
-  static void Print(const MatrixXd &matrix, const string &name);
-  static void Print(const VectorXd &vector, const string &name);
-  static void PrintIn(const string &name);
-  static void PrintOut(const string &name);
+
+  static void SetVerbosity(int level);
+  static void Print(int verbosity, int value, const string &name);
+  static void Print(int verbosity, double value, const string &name);
+  static void Print(int verbosity, const MatrixXd &matrix, const string &name);
+  static void Print(int verbosity, const VectorXd &vector, const string &name);
+  static void PrintIn(int verbosity, const string &name);
+  static void PrintOut(int verbosity, const string &name);
 };
 
 

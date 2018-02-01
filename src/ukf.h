@@ -1,11 +1,12 @@
-#ifndef UKF_H
-#define UKF_H
+#ifndef _USERS_LIAM_DEV_UDACITY_CARND_UNSCENTED_KALMAN_FILTER_PROJECT_SRC_UKF_H
+#define _USERS_LIAM_DEV_UDACITY_CARND_UNSCENTED_KALMAN_FILTER_PROJECT_SRC_UKF_H
 
-#include "measurement_package.h"
 #include "Eigen/Dense"
-#include <vector>
-#include <string>
+#include "measurement_package.h"
+
 #include <fstream>
+#include <string>
+#include <vector>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -30,8 +31,8 @@ class UKF {
 
   /**
    * Prediction Predicts sigma points, the state, and the state covariance
-   * matrix
-   * @param delta_t Time between k and k+1 in s
+   * matrix.
+   * @param delta_t Time between k and k+1 in seconds.
    */
   void Prediction(double delta_t);
 
@@ -39,18 +40,18 @@ class UKF {
    * Updates the state and the state covariance matrix using a laser measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateLidar(double delta_t, const VectorXd& measurement);
+  void UpdateLidar(const VectorXd& measurement);
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateRadar(double delta_t, const VectorXd& measurement);
+  void UpdateRadar(const VectorXd& measurement);
 
   /**
    * Generates the sigma points.
    */
-  void AugmentedSigmaPoints(MatrixXd* Xsig_out);
+  void GenerateAugmentedSigmaPoints(MatrixXd* Xsig_out);
 
   /**
    * Generates the sigam points and then predicts the values for Xsig_pred_
@@ -66,26 +67,18 @@ class UKF {
 
   /**
    * Update the predicted state in radar measurement space.
-   * @param delta_t
    */
-  void PredictRadarMeasurement(double delta_t);
+  void PredictRadarMeasurement();
 
   /**
    * Accessor for the state x.
    * @return state x vector.
    */
-  const VectorXd &x() const {return x_;}
+  const VectorXd& x() const { return x_; }
 
  private:
-
   ///* initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
-
-  ///* if this is false, laser measurements will be ignored (except for init)
-  bool use_laser_;
-
-  ///* if this is false, radar measurements will be ignored (except for init)
-  bool use_radar_;
 
   ///* state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
   VectorXd x_;
@@ -96,11 +89,14 @@ class UKF {
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
-  // Measurement noise radar
+  ///* Measurement noise radar
   MatrixXd R_rad_;
 
-  // Measurement noise lidar
+  ///* Measurement noise lidar
   MatrixXd R_lid_;
+
+  ///* Process noise matrix.
+  MatrixXd Q_;
 
   MatrixXd S_rad_;
   VectorXd z_rad_pred_;
@@ -113,50 +109,17 @@ class UKF {
   ///* time when the state is true, in us
   long long time_us_;
 
-  ///* Process noise standard deviation longitudinal acceleration in m/s^2
-  double std_a_;
-
-  ///* Process noise standard deviation yaw acceleration in rad/s^2
-  double std_yawdd_;
-
-  ///* Laser measurement noise standard deviation position1 in m
-  double std_laspx_;
-
-  ///* Laser measurement noise standard deviation position2 in m
-  double std_laspy_;
-
-  ///* Radar measurement noise standard deviation radius in m
-  double std_radr_;
-
-  ///* Radar measurement noise standard deviation angle in rad
-  double std_radphi_;
-
-  ///* Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  double current_timestamp_;
 
   ///* Weights of sigma points
   VectorXd weights_;
 
-  ///* State dimension
-  int n_x_;
-
-  ///* Radar measurement space dimension
-  int n_z_;
-
-  ///* Augmented state dimension
-  int n_aug_;
-
-  ///* Sigma point spreading parameter
-  double lambda_;
-
-  // Number of sigma points
-  int n_sigma_;
-
   // NIS samples for Radar
-  std::vector<std::pair<double, double>> radar_nis_samples_;
+  std::fstream radar_nis_samples_;
   // NIS samples for Lidar
-  std::vector<std::pair<double, double>> lidar_nis_samples_;
+  std::fstream lidar_nis_samples_;
 
+  int counter_ = 0;
 };
 
-#endif /* UKF_H */
+#endif //_USERS_LIAM_DEV_UDACITY_CARND_UNSCENTED_KALMAN_FILTER_PROJECT_SRC_UKF_H

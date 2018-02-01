@@ -1,11 +1,13 @@
-#include <iostream>
 #include "tools.h"
+#include <iostream>
 
-using Eigen::VectorXd;
 using Eigen::MatrixXd;
+using Eigen::VectorXd;
 using std::vector;
 
-VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
+static int current_verbosity = 1;
+
+VectorXd Tools::CalculateRMSE(const vector /*unused*/<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
   VectorXd rmse(4);
   rmse << 0, 0, 0, 0;
@@ -34,15 +36,9 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
 
 double Tools::NormalizeAngle(double radians_in) {
   double normalized_angle = radians_in;
-  double two_pi = 2 * M_PI;
-  while (normalized_angle < -M_PI || normalized_angle > M_PI) {
-    if (normalized_angle > M_PI) {
-      normalized_angle -= two_pi;
-    }
-    if (normalized_angle < -M_PI) {
-      normalized_angle += two_pi;
-    }
-  }
+  constexpr double kTwoPI = 2.0 * M_PI;
+  while (normalized_angle > M_PI) normalized_angle -=kTwoPI;
+  while (normalized_angle <-M_PI) normalized_angle +=kTwoPI;
   return normalized_angle;
 }
 
@@ -50,14 +46,16 @@ VectorXd Tools::PositionSpaceToRadarMeasurementSpace(const VectorXd &x) {
   VectorXd rm_space(3);
   rm_space.fill(0.0);
   // recover state parameters
-  float px = x(0);
-  float py = x(1);
-  float v = x(2);
-  float phi = x(3);
+  double px = x(0);
+  double py = x(1);
+  double v = x(2);
+  double phi = x(3);
 
-  float c1 = (px * px) + (py * py);
-  if (c1 < 0.00001) return rm_space;
-  float c2 = sqrt(c1);
+  double c1 = (px * px) + (py * py);
+  if (c1 < 0.001) {
+    return rm_space;
+  }
+  double c2 = sqrt(c1);
 
   double ro = c2;
   double theta = atan2(py, px);
@@ -66,20 +64,38 @@ VectorXd Tools::PositionSpaceToRadarMeasurementSpace(const VectorXd &x) {
   return rm_space;
 }
 
-void Tools::Print(const MatrixXd &matrix, const string &name) {
+void Tools::SetVerbosity(int level) {
+  current_verbosity = level;
+}
+
+void Tools::Print(int verbosity, int value, const string &name) {
+  if (verbosity > current_verbosity) return;
+  std::cout << name << "=" << value << std::endl;
+}
+
+void Tools::Print(int verbosity, double value, const string &name) {
+  if (verbosity > current_verbosity) return;
+  std::cout << name << "=" << value << std::endl;
+}
+
+void Tools::Print(int verbosity, const MatrixXd &matrix, const string &name) {
+  if (verbosity > current_verbosity) return;
   Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
   std::cout << name << "=" << std::endl << matrix.format(CleanFmt) << std::endl;
 }
 
-void Tools::Print(const VectorXd &vector, const string &name) {
+void Tools::Print(int verbosity, const VectorXd &vector, const string &name) {
+  if (verbosity > current_verbosity) return;
   Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-  std::cout << name << "=" << std::endl << vector.transpose().format(CleanFmt) << std::endl;
+  std::cout << name << "=" << vector.transpose().format(CleanFmt) << std::endl;
 }
 
-void Tools::PrintIn(const string &name) {
+void Tools::PrintIn(int verbosity, const string &name) {
+  if (verbosity > current_verbosity) return;
   std::cout << ">>>>>>>>>>>> " << name << std::endl;
 }
 
-void Tools::PrintOut(const string &name) {
+void Tools::PrintOut(int verbosity, const string &name) {
+  if (verbosity > current_verbosity) return;
   std::cout << "<<<<<<<<<<<< " << name << std::endl;
 }
