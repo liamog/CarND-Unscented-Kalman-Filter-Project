@@ -37,8 +37,8 @@ VectorXd Tools::CalculateRMSE(const vector /*unused*/<VectorXd> &estimations,
 double Tools::NormalizeAngle(double radians_in) {
   double normalized_angle = radians_in;
   constexpr double kTwoPI = 2.0 * M_PI;
-  while (normalized_angle > M_PI) normalized_angle -=kTwoPI;
-  while (normalized_angle <-M_PI) normalized_angle +=kTwoPI;
+  while (normalized_angle > M_PI) normalized_angle -= kTwoPI;
+  while (normalized_angle < -M_PI) normalized_angle += kTwoPI;
   return normalized_angle;
 }
 
@@ -64,9 +64,7 @@ VectorXd Tools::PositionSpaceToRadarMeasurementSpace(const VectorXd &x) {
   return rm_space;
 }
 
-void Tools::SetVerbosity(int level) {
-  current_verbosity = level;
-}
+void Tools::SetVerbosity(int level) { current_verbosity = level; }
 
 void Tools::Print(int verbosity, int value, const string &name) {
   if (verbosity > current_verbosity) return;

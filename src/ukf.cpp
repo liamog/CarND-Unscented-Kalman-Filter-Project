@@ -52,7 +52,7 @@ constexpr int kNaug = 7;
 constexpr int kNSigma = ((2 * kNaug) + 1);
 
 // Lambda design parameter.
-constexpr double kLambda =  3 - kNaug;
+constexpr double kLambda = 3 - kNaug;
 
 constexpr bool kUseRadar = true;
 constexpr bool kUseLidar = true;
@@ -62,7 +62,7 @@ constexpr bool kUseLidar = true;
  */
 UKF::UKF()
     : x_(kNx),
-      Q_(2,2),
+      Q_(2, 2),
       P_(kNx, kNx),
       Xsig_pred_(kNx, kNSigma),
       S_rad_(kNz, kNz),
@@ -71,11 +71,10 @@ UKF::UKF()
       I_(MatrixXd::Identity(kNx, kNx)),
       z_rad_pred_(kNz),
       R_rad_(3, 3),
-      R_lid_(2,2),
+      R_lid_(2, 2),
       weights_(kNSigma),
       radar_nis_samples_("radar_nis.csv", std::fstream::out),
       lidar_nis_samples_("lidar_nis.csv", std::fstream::out) {
-
   // initial state vector
   x_.fill(0.0);
 
@@ -168,8 +167,7 @@ void UKF::ProcessMeasurement(MeasurementPackage measurement_pack) {
 
   current_timestamp_ = measurement_pack.timestamp_ / 1000000.0;
   double delta_t = (measurement_pack.timestamp_ - time_us_) / 1000000.0;
-  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR &&
-      kUseRadar) {
+  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR && kUseRadar) {
     Tools::PrintIn(3, "UKF::ProcessMeasurement RADAR Measurement");
     PRINT(2, x_);
     PRINT(2, P_);
@@ -237,7 +235,6 @@ void UKF::UpdateLidar(const VectorXd &measurement) {
   Tools::PrintOut(3, "UpdateLidar");
 }
 
-
 void UKF::PredictSigmaPoints(double delta_t) {
   Tools::PrintIn(3, "PredictSigmaPoints");
 
@@ -268,8 +265,7 @@ void UKF::PredictSigmaPoints(double delta_t) {
     VectorXd pred_stochastic(5);
     pred_stochastic << 0.5 * delta_t_2 * cos_psi * v_a,
         0.5 * delta_t_2 * sin_psi * v_a, delta_t * v_a,
-        0.5 * delta_t_2 * v_psi_dot_dot,
-        delta_t * v_psi_dot_dot;
+        0.5 * delta_t_2 * v_psi_dot_dot, delta_t * v_psi_dot_dot;
 
     // Generate the prediction for the column.
     if (fabs(psi_dot) > 0.0001) {
@@ -291,7 +287,7 @@ void UKF::PredictSigmaPoints(double delta_t) {
   Tools::PrintOut(3, "PredictSigmaPoints");
 }
 
-void UKF::GenerateAugmentedSigmaPoints(MatrixXd* Xsig_out) {
+void UKF::GenerateAugmentedSigmaPoints(MatrixXd *Xsig_out) {
   Tools::PrintIn(3, "AugmentedSigmaPoints");
 
   // create sigma point matrix
@@ -348,7 +344,7 @@ void UKF::PredictMeanAndCovarianceSigmaPoints() {
     // angle normalization
     x_diff(3) = Tools::NormalizeAngle(x_diff(3));
     P_pred = P_pred + weights_(i) * x_diff * x_diff.transpose();
-    //P_pred(3,3) = Tools::NormalizeAngle(P_pred(3,3));
+    // P_pred(3,3) = Tools::NormalizeAngle(P_pred(3,3));
   }
   PRINT(2, P_pred);
 
@@ -373,7 +369,7 @@ void UKF::PredictRadarMeasurement() {
   z_rad_pred_.fill(0.0);
   for (int ii = 0; ii < kNSigma; ++ii) {  // iterate over sigma points
     z_rad_pred_ = z_rad_pred_ + (weights_(ii) * Zsig.col(ii));
-//    z_rad_pred_(1) = Tools::NormalizeAngle(z_rad_pred_(1));
+    //    z_rad_pred_(1) = Tools::NormalizeAngle(z_rad_pred_(1));
   }
   PRINT(2, z_rad_pred_);
 
@@ -425,7 +421,7 @@ void UKF::UpdateRadar(const VectorXd &measurement) {
   x_ = x_ + K * z_diff;
   x_(3) = Tools::NormalizeAngle(x_(3));
   P_ = P_ - K * S_rad_ * K.transpose();
-  P_(3,3) = Tools::NormalizeAngle(P_(3,3));
+  P_(3, 3) = Tools::NormalizeAngle(P_(3, 3));
 
   PRINT(2, measurement);
 
